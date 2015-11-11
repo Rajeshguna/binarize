@@ -1,0 +1,9 @@
+sqlite:
+  adapter: sqlite3
+  database: ":memory:"
+  timeout: 500
+mysql:
+  adapter: mysql2
+  database: binarize
+  username: binarize
+  encoding: utf8

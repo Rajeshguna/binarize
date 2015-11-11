@@ -1,4 +1,18 @@
 require 'simplecov'
+require "active_record"
+require "yaml"
+require "logger"
+
+ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
+ActiveRecord::Migration.verbose = false
+
+configs = YAML.load_file(File.dirname(__FILE__) + "/database.yml")
+ActiveRecord::Base.configurations = configs
+
+db_name = (ENV["DB"] || "sqlite").to_sym
+ActiveRecord::Base.establish_connection(db_name)
+
+load(File.dirname(__FILE__) + "/schema.rb")
 
 module SimpleCov::Configuration
   def clean_filters
@@ -11,7 +25,8 @@ SimpleCov.configure do
   load_adapter 'test_frameworks'
 end
 
-ENV["COVERAGE"] && SimpleCov.start do
+SimpleCov.start do
+  puts "Coverage enabled"
   add_filter "/.rvm/"
 end
 require 'rubygems'
@@ -23,12 +38,14 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
-require 'test/unit'
+require 'minitest/autorun'
+# require 'test/unit'
 require 'shoulda'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'binarize'
 
-class Test::Unit::TestCase
+def assert_equal_arrays(ar1, ar2)
+  assert_equal(ar1.sort, ar2.sort)
 end

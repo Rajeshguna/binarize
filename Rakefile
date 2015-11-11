@@ -22,6 +22,9 @@ Jeweler::Tasks.new do |gem|
   gem.email = "thanashyam@gmail.com"
   gem.authors = ["Thanashyam Raj"]
   # dependencies defined in Gemfile
+  
+  gem.add_dependency 'activerecord'
+  gem.files = Dir.glob('lib/**/*.rb')
 end
 Jeweler::RubygemsDotOrgTasks.new
 
@@ -48,4 +51,26 @@ Rake::RDocTask.new do |rdoc|
   rdoc.title = "binarize #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+
+Rake::Task["console"].clear
+desc "Open My own irb session preloaded with this library"
+task :console do
+  require "active_record"
+  require "yaml"
+  require "logger"
+  require "binarize"
+
+  configs = YAML.load_file(File.dirname(__FILE__) + "/test/database.yml")
+  ActiveRecord::Base.configurations = configs
+
+  db_name = (ENV["DB"] || "sqlite").to_sym
+  ActiveRecord::Base.establish_connection(db_name)
+
+  load(File.dirname(__FILE__) + "/test/schema.rb")
+
+  require 'irb'
+  ARGV.clear
+  IRB.start
 end
