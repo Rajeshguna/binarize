@@ -6,11 +6,6 @@ module Binarize
     base.class_attribute :binarize_config unless defined?(base.binarize_config)
   end
   
-  DEFAULT_OPTIONS = {
-    flags: [],
-    as: :integer
-  }
-  
   TRUE_VALUES = [true, 1, "1", "t", "T", "true", "TRUE", :true]
 
   module ClassMethods
