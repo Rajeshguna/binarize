@@ -32,13 +32,13 @@ class TestBinarize < Minitest::Test
   end
   
   
-  context "Binarize" do
-    setup do
+  describe "Binarize" do
+    before do
       Car.destroy_all
     end
     
     
-    should "respond_to and return list of flags present in a column" do
+    it "respond_to and return list of flags present in a column" do
       
       FLAGS_COLUMNS.keys.each do |column|
         # #{column_name}_flags
@@ -50,7 +50,7 @@ class TestBinarize < Minitest::Test
     end
     
     
-    should "have the all the column based methods defined" do
+    it "have the all the column based methods defined" do
       
       car = Car.new
       
@@ -80,7 +80,7 @@ class TestBinarize < Minitest::Test
       
     end
     
-    should "have respond to all the flag based methods defined" do
+    it "have respond to all the flag based methods defined" do
       
       car = Car.new
       FLAGS_COLUMNS.each do |column, flags|
@@ -107,7 +107,7 @@ class TestBinarize < Minitest::Test
       
     end
 
-    should "return false for any_{column} and all_{column} for all the binarize columns for a new object" do
+    it "return false for any_{column} and all_{column} for all the binarize columns for a new object" do
       
       car = Car.new
       FLAGS_COLUMNS.each do |column, flags|
@@ -116,7 +116,7 @@ class TestBinarize < Minitest::Test
       end
     end
 
-    should "set the values for a flag properly using mark and unmark methods" do
+    it "set the values for a flag properly using mark and unmark methods" do
       car = Car.new(name: "Model X", brand: "Tesla")
       
       chosen_flags = {}
@@ -206,7 +206,7 @@ class TestBinarize < Minitest::Test
       end
     end
     
-    should "work when all the values are 0 or ''" do
+    it "work when all the values are 0 or ''" do
       car = Car.new(name: "Model T", brand: "Ford")
       car.save
       
@@ -235,7 +235,7 @@ class TestBinarize < Minitest::Test
       end
     end
     
-    should "work with value assignment" do
+    it "work with value assignment" do
       car = Car.new(name: "Creta", brand: "Hyundai")
       car.save
       
@@ -278,7 +278,7 @@ class TestBinarize < Minitest::Test
       end
     end
     
-    should "work while assigning non boolean values for the flags" do
+    it "work while assigning non boolean values for the flags" do
       car = Car.new(name: "Prius", brand: "Toyota")
       car.save
       car.reload
@@ -306,7 +306,7 @@ class TestBinarize < Minitest::Test
       end
     end
     
-    should "return true for _changed method when the values have been touched" do
+    it "return true for _changed method when the values have been touched" do
       car = Car.new(name: "Civic", brand: "Honda")
       car.save
       car.reload
