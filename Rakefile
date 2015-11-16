@@ -11,23 +11,6 @@ rescue Bundler::BundlerError => e
 end
 require 'rake'
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
-  gem.name = "binarize"
-  gem.homepage = "http://github.com/thanashyam/binarize"
-  gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
-  gem.email = "thanashyam@gmail.com"
-  gem.authors = ["Thanashyam Raj"]
-  # dependencies defined in Gemfile
-  
-  gem.add_dependency 'activerecord'
-  gem.files = Dir.glob('lib/**/*.rb')
-end
-Jeweler::RubygemsDotOrgTasks.new
-
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
@@ -54,7 +37,6 @@ Rake::RDocTask.new do |rdoc|
 end
 
 
-Rake::Task["console"].clear
 desc "Open My own irb session preloaded with this library"
 task :console do
   require "active_record"
