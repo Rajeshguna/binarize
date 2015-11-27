@@ -10,16 +10,35 @@ module Binarize
 
   module ClassMethods
     def binarize(column, flags: [], as: :integer)
-      raise 'Invalid value for flags' unless flags.is_a?(Array) && flags.size > 1
       self.binarize_config ||= {}
-      raise 'Column already binarized' if binarize_config.keys.include?(column)
-      raise 'Column not there' unless self.column_names.include?(column.to_s)
+      return unless validate_binarize_config(column, flags, as)
+      
       column = column.to_sym
       add_config(column, flags, as)
       define_methods(column)
     end
     
     private
+    
+    def validate_binarize_config(column, flags, as)
+      
+      unless self.column_names.include?(column.to_s)
+        warn "Unable to find `#{column}` column. Please make sure the migrations have been ran."
+        return false
+      end
+      
+      if binarize_config.keys.include?(column)
+        warn "#{column} has already been binarized."
+        return false
+      end
+      
+      unless flags.is_a?(Array) && flags.size > 1
+        raise "Flag set for #{column} is not an array( with 2 or more items)."
+        return false
+      end
+      true
+      
+    end
     
     def add_config(column, flags, as)
       self.binarize_config[column] = {

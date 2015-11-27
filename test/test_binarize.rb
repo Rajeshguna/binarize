@@ -343,5 +343,64 @@ class TestBinarize < Minitest::Test
       end
       
     end
+    
+    it "should warn when a column is missing" do
+      output, logs = capture_io do
+        class Automobile < ActiveRecord::Base
+          self.table_name = :cars
+          include Binarize
+          
+          binarize :missing_column, :flags =>[:invalid, :inopportune, :warn_now]
+        end
+      end
+      
+      assert_match %r%Unable to find%, logs
+    end
+    
+    it "should warn when a column has already been binarized" do
+      output, logs = capture_io do
+        class InvalidCar < ActiveRecord::Base
+          self.table_name = :cars
+          include Binarize
+          
+          binarize :safety, :flags => FLAGS_COLUMNS[:safety]
+          binarize :safety, :flags => FLAGS_COLUMNS[:safety]
+        end
+      end
+      
+      assert_match %r%has already been binarized.%, logs
+    end
+    
+    it "should throw error when flag value is invalid" do
+      exception = "Flag set for safety is not an array( with 2 or more items)."
+      assert_raises(exception) {
+        class InvalidCar1 < ActiveRecord::Base
+          self.table_name = :cars
+          include Binarize
+          
+          binarize :safety, :flags => FLAGS_COLUMNS[:safety].sample
+        end
+      }
+      
+      assert_raises(exception) {
+        class InvalidCar2 < ActiveRecord::Base
+          self.table_name = :cars
+          include Binarize
+          
+          binarize :safety, :flags => [FLAGS_COLUMNS[:safety].sample]
+        end
+      }
+      
+      assert_raises(exception) {
+        class InvalidCar3 < ActiveRecord::Base
+          self.table_name = :cars
+          include Binarize
+          
+          binarize :safety, :flags => 9
+        end
+      }
+      
+    end
+      
   end
 end
