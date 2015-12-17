@@ -98,11 +98,11 @@ module Binarize
       end
       
       define_method "mark_#{flag}_#{column}" do
-        self[column] = self[column].to_i | flag_mapping(column, flag)
+        self[column] = self.send(column).to_i | flag_mapping(column, flag)
       end
       
       define_method "unmark_#{flag}_#{column}" do
-        self[column] = self[column].to_i & ~flag_mapping(column, flag)
+        self[column] = self.send(column).to_i & ~flag_mapping(column, flag)
       end
       
       define_method "toggle_#{flag}_#{column}" do
@@ -115,14 +115,7 @@ module Binarize
       
       define_method "#{flag}_#{column}_changed?" do
         flag_map = flag_mapping(column, flag)
-        # puts "self.changes.include?(column)"
-        # puts self.changes.include?(column)
-        # 
-        # puts "(self[column].to_i & flag_map)"
-        # puts (self[column].to_i & flag_map)
-        # puts "(self.changes[column].first.to_i & flag_map)"
-        # puts (self.changes[column].first.to_i & flag_map)
-        self.changes.include?(column) && ((self[column].to_i & flag_map) != (self.changes[column].first.to_i & flag_map))
+        self.changes.include?(column) && ((self.send(column).to_i & flag_map) != (self.changes[column].first.to_i & flag_map))
       end
       
     end
@@ -138,7 +131,7 @@ module Binarize
       raise "Flag not available in the Binary Column specified" unless self.class.binarize_config[column][:flags].include?(flag)
       
       flag_map = flag_mapping(column, flag)
-      (self[column].to_i & flag_map) == flag_map
+      (self.send(column).to_i & flag_map) == flag_map
     end
     
     def flag_mapping(column, flag)
