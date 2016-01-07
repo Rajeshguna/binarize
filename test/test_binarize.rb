@@ -37,19 +37,6 @@ class TestBinarize < Minitest::Test
       Car.destroy_all
     end
     
-    
-    it "respond_to and return list of flags present in a column" do
-      
-      FLAGS_COLUMNS.keys.each do |column|
-        # #{column_name}_flags
-        # Method to find the list of Flags present in that column.
-        assert_respond_to(Car, :"#{column}_flags")
-        
-        assert_equal FLAGS_COLUMNS[column], Car.send(:"#{column}_flags")
-      end
-    end
-    
-    
     it "have the all the column based methods defined" do
       
       car = Car.new
@@ -88,12 +75,6 @@ class TestBinarize < Minitest::Test
           # Whether the flag is true or false
           assert_respond_to(car, :"#{flag}_#{column}?")
           
-          # Set the flag to true
-          assert_respond_to(car, :"mark_#{flag}_#{column}")
-          
-          # Set the flag to false
-          assert_respond_to(car, :"unmark_#{flag}_#{column}")
-          
           # Toggle the flag value
           assert_respond_to(car, :"toggle_#{flag}_#{column}")
           
@@ -115,96 +96,6 @@ class TestBinarize < Minitest::Test
         assert_equal false, car.send(:"all_#{column}?")
       end
     end
-
-    it "set the values for a flag properly using mark and unmark methods" do
-      car = Car.new(name: "Model X", brand: "Tesla")
-      
-      chosen_flags = {}
-      FLAGS_COLUMNS.each do |column, flags|
-        chosen_flags[column] = flags.sample(flags.size/2)
-        chosen_flags[column].each do |flag|
-          car.send(:"mark_#{flag}_#{column}")
-          assert_equal true, car.send(:"#{flag}_#{column}?")
-        end
-        
-        (flags - chosen_flags[column]).each do |flag|
-          assert_equal false, car.send(:"#{flag}_#{column}?")
-        end
-        
-        assert_equal true, car.send(:"any_#{column}?")
-        assert_equal false, car.send(:"all_#{column}?")
-        
-        
-        assert_equal_arrays chosen_flags[column], car.send(:"in_#{column}")
-        assert_equal_arrays (flags - chosen_flags[column]), car.send(:"not_in_#{column}")
-        
-      end
-      
-      # Checking their values after saving the object
-      car.save
-      car.reload
-      FLAGS_COLUMNS.each do |column, flags|
-        chosen_flags[column].each do |flag|
-          assert_equal true, car.send(:"#{flag}_#{column}?")
-        end
-        
-        (flags - chosen_flags[column]).each do |flag|
-          assert_equal car.send(:"#{flag}_#{column}?"), false
-        end
-        
-        assert_equal true, car.send(:"any_#{column}?")
-        assert_equal false, car.send(:"all_#{column}?")
-        
-        assert_equal_arrays chosen_flags[column], car.send(:"in_#{column}")
-        assert_equal_arrays (flags - chosen_flags[column]), car.send(:"not_in_#{column}")
-        
-      end
-      
-      # Now unmarking a few of the ones that were marked previously
-      removed_flags = {}
-      FLAGS_COLUMNS.each do |column, flags|
-        removed_flags[column] = chosen_flags[column].sample(chosen_flags[column].size/2)
-        removed_flags[column].each do |flag|
-          car.send(:"unmark_#{flag}_#{column}")
-          assert_equal false, car.send(:"#{flag}_#{column}?")
-          assert_includes car.send(:"not_in_#{column}"), flag
-        end
-        assert_equal_arrays (flags - (chosen_flags[column] - removed_flags[column])), car.send(:"not_in_#{column}")
-      end
-      
-      # Checking the unmarking assertions after saving
-      car.save
-      car.reload
-      FLAGS_COLUMNS.each do |column, flags|
-        removed_flags[column].each do |flag|
-          assert_equal false, car.send(:"#{flag}_#{column}?")
-          assert_includes car.send(:"not_in_#{column}"), flag
-        end
-        assert_equal_arrays (flags - (chosen_flags[column] - removed_flags[column])), car.send(:"not_in_#{column}")
-      end
-      
-      # Toggling those removed columns now
-      FLAGS_COLUMNS.each do |column, flags|
-        removed_flags[column].each do |flag|
-          car.send(:"toggle_#{flag}_#{column}")
-          assert_equal true, car.send(:"#{flag}_#{column}?")
-          assert_includes car.send(:"in_#{column}"), flag
-        end
-        assert_equal_arrays chosen_flags[column], car.send(:"in_#{column}")
-      end
-      
-      # Checking the Toggling stuff after save
-      
-      car.save
-      car.reload
-      FLAGS_COLUMNS.each do |column, flags|
-        removed_flags[column].each do |flag|
-          assert_equal true, car.send(:"#{flag}_#{column}?")
-          assert_includes car.send(:"in_#{column}"), flag
-        end
-        assert_equal_arrays chosen_flags[column], car.send(:"in_#{column}")
-      end
-    end
     
     it "work when all the values are 0 or ''" do
       car = Car.new(name: "Model T", brand: "Ford")
@@ -217,7 +108,7 @@ class TestBinarize < Minitest::Test
         assert_equal false, car.send(:"all_#{column}?")
         
         flags.each do |flag|
-          car.send(:"mark_#{flag}_#{column}")
+          car.send(:"#{flag}_#{column}=", true)
         end
       
         assert_equal_arrays flags, car.send(:"in_#{column}")
@@ -320,12 +211,12 @@ class TestBinarize < Minitest::Test
         end
         
         flag_values[column][:positive].each do |flag|
-          car.send(:"mark_#{flag}_#{column}")
+          car.send(:"#{flag}_#{column}=", true)
           assert_equal true, car.send(:"#{flag}_#{column}_changed?")
         end
         
         flag_values[column][:negative].each do |flag|
-          car.send(:"unmark_#{flag}_#{column}")
+          car.send(:"#{flag}_#{column}=", false)
           assert_equal false, car.send(:"#{flag}_#{column}_changed?")
         end
       end

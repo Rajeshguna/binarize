@@ -63,10 +63,6 @@ module Binarize
     
     def define_column_methods(column)
       
-      self.class.send(:define_method, "#{column}_flags") do
-        binarize_config[column][:flags] || []
-      end
-      
       define_method "#{column}_values" do
         (self.binarize_config[column][:flags].inject({}) do |result, flag|
           result.merge({ flag => flag_value(column, flag) })
@@ -106,11 +102,13 @@ module Binarize
       end
       
       define_method "toggle_#{flag}_#{column}" do
-        send("#{flag}_#{column}?") ? send("unmark_#{flag}_#{column}") : send("mark_#{flag}_#{column}")
+        self[column] = self.send(column).to_i ^ flag_mapping(column, flag)
       end
       
       define_method "#{flag}_#{column}=" do |value|
-        Binarize::TRUE_VALUES.include?(value) ? send("mark_#{flag}_#{column}") : send("unmark_#{flag}_#{column}")
+        self[column] = Binarize::TRUE_VALUES.include?(value) ? 
+            self.send(column).to_i | flag_mapping(column, flag) :
+            self.send(column).to_i & ~flag_mapping(column, flag)
       end
       
       define_method "#{flag}_#{column}_changed?" do
