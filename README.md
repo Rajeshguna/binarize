@@ -19,14 +19,9 @@ class Car < ActiveRecord::Base
 ```
 # How to use
 ```ruby
-# Returns the set of the flags stored in a column
-Car.safety_flags
-
 # Setting value for the flags
 car = Car.new(name: "Model X", brand: "Tesla")
-# We are going to see the ways to toggle the ABS flag here.
-car.mark_abs_safety #Sets to true
-car.unmark_abs_safety #to false
+
 car.toggle_abs_safety
 car.abs_safety = true #or false
 
