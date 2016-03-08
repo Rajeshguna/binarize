@@ -22,7 +22,7 @@ module Binarize
     
     def validate_binarize_config(column, flags, as)
       
-      unless self.column_names.include?(column.to_s)
+      unless self.table_exists? && self.column_names.include?(column.to_s)
         warn "Unable to find `#{column}` column. Please make sure the migrations have been ran."
         return false
       end
