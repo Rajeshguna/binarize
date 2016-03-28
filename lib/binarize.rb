@@ -7,6 +7,7 @@ module Binarize
   end
   
   TRUE_VALUES = [true, 1, "1", "t", "T", "true", "TRUE", :true]
+  STRING_COLUMN_TYPES = [:string, :text]
 
   module ClassMethods
     def binarize(column, flags: [], as: :integer)
@@ -16,6 +17,10 @@ module Binarize
       column = column.to_sym
       add_config(column, flags, as)
       define_methods(column)
+    end
+    
+    def string_column?(column)
+      STRING_COLUMN_TYPES.include? self.columns_hash[column.to_s].type
     end
     
     private
@@ -94,21 +99,21 @@ module Binarize
       end
       
       define_method "mark_#{flag}_#{column}" do
-        self[column] = self.send(column).to_i | flag_mapping(column, flag)
+        assign_binarize_value(column, self.send(column).to_i | flag_mapping(column, flag))
       end
       
       define_method "unmark_#{flag}_#{column}" do
-        self[column] = self.send(column).to_i & ~flag_mapping(column, flag)
+        assign_binarize_value(column, self.send(column).to_i & ~flag_mapping(column, flag))
       end
       
       define_method "toggle_#{flag}_#{column}" do
-        self[column] = self.send(column).to_i ^ flag_mapping(column, flag)
+        assign_binarize_value(column, self.send(column).to_i ^ flag_mapping(column, flag))
       end
       
       define_method "#{flag}_#{column}=" do |value|
-        self[column] = Binarize::TRUE_VALUES.include?(value) ? 
+        assign_binarize_value(column, Binarize::TRUE_VALUES.include?(value) ? 
             self.send(column).to_i | flag_mapping(column, flag) :
-            self.send(column).to_i & ~flag_mapping(column, flag)
+            self.send(column).to_i & ~flag_mapping(column, flag))
       end
       
       define_method "#{flag}_#{column}_changed?" do
@@ -121,6 +126,10 @@ module Binarize
   end
   
   module InstanceMethods
+    
+    def assign_binarize_value(column, value)
+      self[column] = value.send(self.class.string_column?(column) ? :to_s : :to_i)
+    end
     
     private
     def flag_value(column, flag)
